@@ -95,7 +95,7 @@ const CreatePost = () => {
               }
               className="text-sm bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white font-medium px-8 py-2 rounded-md cursor-pointer"
             >
-              Publish Posts
+              Publish Post
             </button>
           </div>
         </div>
