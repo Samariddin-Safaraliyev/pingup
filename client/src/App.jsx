@@ -30,7 +30,8 @@ const App = () => {
 
     fetchData();
   }, [user, getToken, dispatch]);
-
+  const creator = "Samariddin Safaraliyev";
+  console.log(`Creator: ${creator}`);
   return (
     <>
       <Toaster />

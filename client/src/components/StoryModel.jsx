@@ -1,25 +1,116 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, Sparkle, TextIcon, Upload } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
 
-const StoryModal = ({ setShowModal, fetchStories }) => {
+const StoryModal = ({ setShowModal, setStories }) => {
   const bgColors = ["#4f46e5", "#999", "#000", "#222", "#555", "#777"];
 
   const [mode, setMode] = useState("text");
-  const [background, setBackground] = useState(bgColors[0]);
+  const [background, setBackground] = useState(bgColors[2]);
   const [text, setText] = useState("");
   const [media, setMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  const { getToken } = useAuth();
+  const fetchStories = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const { data } = await api.get("/api/story/get", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (data.success) {
+        setStories(data.stories);
+      } else {
+        toast(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }, [getToken, setStories]);
+
+  useEffect(() => {
+    fetchStories();
+  }, [fetchStories]);
+
+  const MAX_VIDEO_DURATION = 60;
+  const MAX_VIDEO_SIZE_MB = 50;
+
   const handleMediaUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setMedia(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      if (file.type.startsWith("video")) {
+        if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+          toast.error(`Video file size cannot exceed ${MAX_VIDEO_SIZE_MB}MB.`);
+          setMedia(null);
+          setPreviewUrl(null);
+          return;
+        }
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = () => {
+          window.URL.revokeObjectURL(video.src);
+          if (video.duration > MAX_VIDEO_DURATION) {
+            toast.error("Video duration cannot exceed 1 minute.");
+            setMedia(null);
+            setPreviewUrl(null);
+          } else {
+            setMedia(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setText("");
+            setMode("media");
+          }
+        };
+        video.src = URL.createObjectURL(file);
+      } else if (file.type.startsWith("image")) {
+        setMedia(file);
+        setPreviewUrl(URL.createObjectURL(file));
+        setText("");
+        setMode("media");
+      }
     }
   };
 
-  const handleCreateStory = async () => {};
+  const handleCreateStory = async () => {
+    const media_type =
+      mode === "media"
+        ? media?.type.startsWith("image")
+          ? "image"
+          : "video"
+        : "text";
+
+    if (media_type === "text" && !text.trim()) {
+      toast.error("Please enter some text");
+      return;
+    }
+
+    let formData = new FormData();
+    formData.append("content", text);
+    formData.append("media_type", media_type);
+    formData.append("background_color", background);
+
+    if (media) {
+      formData.append("media", media);
+    }
+
+    const token = await getToken();
+    try {
+      const { data } = await api.post("/api/story/create", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setShowModal(false);
+        toast.success("Story created successfully");
+        fetchStories();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-110 min-h-screen bg-black/80 backdrop-blur text-white flex items-center justify-center p-4">
@@ -88,10 +179,7 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
             }`}
           >
             <input
-              onChange={(e) => {
-                handleMediaUpload(e);
-                setMode("media");
-              }}
+              onChange={handleMediaUpload}
               type="file"
               accept="image/*, video/*"
               className="hidden"
@@ -103,8 +191,6 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
           onClick={() =>
             toast.promise(handleCreateStory(), {
               loading: "Saving...",
-              success: <p>Story Added</p>,
-              error: (e) => <p>{e.message}</p>,
             })
           }
           className="flex items-center justify-center gap-2 text-white py-3 mt-4 w-full rounded bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer"

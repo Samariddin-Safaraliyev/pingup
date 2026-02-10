@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { dummyStoriesData } from "../assets/assets";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import moment from "moment";
 import StoryModal from "./StoryModel";
@@ -9,15 +8,6 @@ const StoriesBar = () => {
   const [stories, setStories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewStory, setViewStory] = useState(null);
-
-  const fetchStories = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    setStories(dummyStoriesData);
-  };
-
-  useEffect(() => {
-    fetchStories();
-  }, []);
 
   return (
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
@@ -43,10 +33,12 @@ const StoriesBar = () => {
             onClick={() => setViewStory(story)}
             key={index}
             className={`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 aspect-3/4 cursor-pointer hover:shadow-lg transition-all duration-200 active:scale-95 overflow-hidden ${
-              story.media_type === "text"
-                ? `bg-[${story.background_color}] hover:opacity-90`
-                : ""
+              story.media_type === "text" ? "hover:opacity-90" : "bg-black"
             }`}
+            style={{
+              backgroundColor:
+                story.media_type === "text" ? story.background_color : "black",
+            }}
           >
             {story.media_type !== "text" && (
               <div className="absolute inset-0 z-0">
@@ -94,7 +86,7 @@ const StoriesBar = () => {
       </div>
       {/* { add story modal} */}
       {showModal && (
-        <StoryModal setShowModal={setShowModal} fetchStories={fetchStories} />
+        <StoryModal setShowModal={setShowModal} setStories={setStories} />
       )}
       {/* View Story Modal */}
       {viewStory && (
