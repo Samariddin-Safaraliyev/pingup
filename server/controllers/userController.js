@@ -88,30 +88,31 @@ export const updateUserData = async (req, res) => {
         res.json({success: false, message: "User not found"});
     }
 }
-
 export const discoverUsers = async (req, res) => {
     try {
-        const {userId} = req.auth();
-        const {input} = req.body;
+        const { userId } = req.auth();
+        const { input } = req.body;
 
-        const allUser = await User.find(
+        const allUsers = await User.find(
             {
                 $or: [
-                    {username: new RegExp(input, 'i')},
-                    {email: new RegExp(input, 'i')},
-                    {full_name: new RegExp(input, 'i')},
-                    {location: new RegExp(input, 'i')},
+                    { username: new RegExp(input, 'i') },
+                    { email: new RegExp(input, 'i') },
+                    { full_name: new RegExp(input, 'i') },
+                    { location: new RegExp(input, 'i') },
                 ]
             }
-        )
-        const filteredUsers = allUsers.filter(user => user._id !== userId);
+        );
 
-        res.json({success: true, users: filteredUsers});
+        const filteredUsers = allUsers.filter(user => user._id.toString() !== userId);
+
+        res.json({ success: true, users: filteredUsers });
     } catch (error) {
-        console.log(error);
-        res.json({success: false, message: "User not found"});
+        console.error("Search error:", error);
+        res.json({ success: false, message: "Search failed" });
     }
 }
+
 
 export const followUser = async (req, res) => {
     try {
@@ -120,7 +121,7 @@ export const followUser = async (req, res) => {
 
         const user = await User.findById(userId);
 
-        if(user.following.incluedes(id)){
+        if(user.following.includes(id)){
             return res.json({success: false, message: 'You are already following this user'});
         }
 
@@ -199,24 +200,44 @@ export const sendConnectionRequest = async (req, res) => {
     }
 }
 
+
+
 export const getUserConnections = async (req, res) => {
-    try{
-        const {userId} = req.auth();
+    try {
+        const { userId } = req.auth();
+        
         const user = await User.findById(userId).populate('connections followers following');
 
-        const connections = user.connections;
-        const followers = user.followers;
-        const following = user.following;
+        if (!user) {
+            return res.json({ 
+                success: false, 
+                message: "Foydalanuvchi topilmadi. Tizimga qayta kiring." 
+            });
+        }
 
-        const pendingConnections = (await Connections.find({to_user_id: userId, status: 'pending'}).populate('from_user_id').map(connection => connection.from_user_id));
+        const connections = user.connections || [];
+        const followers = user.followers || [];
+        const following = user.following || [];
 
-        res.json({success: true, connections, followers, following, pendingConnections});
+        const pendingDocs = await Connection.find({ to_user_id: userId, status: 'pending' })
+                                           .populate('from_user_id');
         
-    }catch(error){
-        console.log(error);
-        res.json({success: false, message: error.message});
+        const pendingConnections = pendingDocs.map(conn => conn.from_user_id).filter(u => u !== null);
+
+        res.json({ 
+            success: true, 
+            connections, 
+            followers, 
+            following, 
+            pendingConnections 
+        });
+        
+    } catch (error) {
+        console.log("Xatolik yuz berdi:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 }
+
 
 
 export const acceptConnectionRequest = async (req, res) => {
