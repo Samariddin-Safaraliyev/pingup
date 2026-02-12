@@ -151,7 +151,7 @@ const sendNotificationOfUnseenMessages = inngest.createFunction(
             <p>Click <a href="${process.env.FRONTEND_URL}/messages" style="color: #10b981;
             ">here</a> to view them</p>
             <br/>
-            [<p>Thanks, <br/>PingUp Stay Connected</p>
+            <p>Thanks, <br/>PingUp Stay Connected</p>
             </div>
             `;
 

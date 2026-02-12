@@ -144,7 +144,7 @@ export const unfollowUser = async (req, res) => {
         const {userId} = req.auth();
         const {id} = req.body;
 
-        const user = await User.findById(userId);
+        const user = await User.findById(id);
         user.following = user.following.filter(user => user !== id);
         await user.save();
 
