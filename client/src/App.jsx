@@ -7,21 +7,31 @@ import Connections from "./pages/Connections";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
 import CreatePost from "./pages/CreatePost";
-import { useUser, useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import Layout from "./pages/Layout";
 import { Toaster } from "react-hot-toast";
+import { useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { fetchUser } from "./features/user/userSlice";
 
 const App = () => {
   const { user } = useUser();
   const { getToken } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      getToken().then((token) => console.log(token));
-    }
-  }, [user]);
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user) {
+        const token = await getToken();
+        dispatch(fetchUser(token));
+      }
+    };
+
+    fetchData();
+  }, [user, getToken, dispatch]);
+  const creator = "Samariddin Safaraliyev";
+  console.log(`Creator: ${creator}`);
   return (
     <>
       <Toaster />

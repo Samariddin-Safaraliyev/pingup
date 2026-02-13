@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Sparkle, TextIcon, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 
-const StoryModal = ({ setShowModal, fetchStories }) => {
+const StoryModal = ({ setShowModal }) => {
   const bgColors = ["#4f46e5", "#999", "#000", "#222", "#555", "#777"];
 
   const [mode, setMode] = useState("text");

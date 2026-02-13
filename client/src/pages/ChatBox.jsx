@@ -6,7 +6,7 @@ const ChatBox = () => {
   const messages = dummyMessagesData;
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
-  const [user, setUser] = useState(dummyUserData);
+  const [user] = useState(dummyUserData);
   const messagesEndRef = useRef(null);
 
   const sendMessage = async () => {};
@@ -32,7 +32,7 @@ const ChatBox = () => {
         <div className="p-5 md:px-10 h-full overflow-y-scroll">
           <div className="space-y-4 max-w-4xl mx-auto">
             {messages
-              .toSorted((a, b) => new Date(a.createdAt) - new Date(b.createdAd))
+              .toSorted((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
               .map((message, index) => (
                 <div
                   key={index}

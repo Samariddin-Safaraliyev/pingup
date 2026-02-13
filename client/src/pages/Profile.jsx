@@ -1,29 +1,54 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { dummyPostsData, dummyUserData } from "../assets/assets";
 import Loading from "../components/Loading";
 import UserProfileInfo from "../components/UserProfileInfo";
 import PostCard from "../components/PostCard";
 import moment from "moment";
 import ProfileModal from "./ProfileModal";
+import toast from "react-hot-toast";
+import api from "../api/axios";
+import { useAuth } from "@clerk/clerk-react";
+import { useSelector } from "react-redux";
 
 const TABS = ["posts", "media", "likes"];
 
 const Profile = () => {
+  const currentUser = useSelector((state) => state.user.value);
+
+  const { getToken } = useAuth();
   const { profileId } = useParams();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [showEdit, setShowEdit] = useState(false);
 
-  const fetchUser = async () => {
-    setUser(dummyUserData);
-    setPosts(dummyPostsData);
-  };
-
   useEffect(() => {
-    fetchUser();
-  }, []);
+    const fetchUser = async (targetProfileId) => {
+      const token = await getToken();
+      try {
+        const { data } = await api.post(
+          `/api/user/profiles`,
+          { profileId: targetProfileId },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (data.success) {
+          setUser(data.profile);
+          setPosts(data.posts || []);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || error.message);
+      }
+    };
+    if (profileId) {
+      fetchUser(profileId);
+    } else if (currentUser?._id) {
+      fetchUser(currentUser._id);
+    }
+  }, [profileId, currentUser, getToken]);
 
   return (
     <>
@@ -82,7 +107,7 @@ const Profile = () => {
                   {posts
                     .filter((post) => post.image_urls.length > 0)
                     .map((post) => (
-                      <>
+                      <div key={post._id}>
                         {post.image_urls.map((image, index) => (
                           <Link
                             target="_blank"
@@ -101,7 +126,7 @@ const Profile = () => {
                             </p>
                           </Link>
                         ))}
-                      </>
+                      </div>
                     ))}
                 </div>
               )}

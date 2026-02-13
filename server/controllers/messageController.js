@@ -26,7 +26,7 @@ export const sseController = (req, res) => {
 
 export const sendMessage = async (req, res) => {
     try{
-        const {userId} = req.auth();
+        const {userId} = await req.auth();
         const {to_user_id, text} = req.body;
         const image = req.file;
         
@@ -37,7 +37,7 @@ export const sendMessage = async (req, res) => {
             const fileBuffer = fs.readFileSync(image.path);
             const response = await imagekit.upload({
                 file: fileBuffer,
-                filseName: image.originalname,
+                fileName: image.originalname,
             })
             media_url = imagekit.url({
                 path: response.filePath,
@@ -71,18 +71,18 @@ export const sendMessage = async (req, res) => {
 
 export const getChatMessages = async (req, res) => {
     try{
-        const {userId} = req.auth();
+        const {userId} = await req.auth();
         const {to_user_id} = req.body;
-        const message = await Message.find({
+        const messages = await Message.find({
             $or: [
                 {from_user_id: userId, to_user_id},
                 {from_user_id: to_user_id, to_user_id: userId},
             ]
-        }).sort({created_at: -1});
+        }).sort({createdAt: -1});
 
         await Message.updateMany({from_user_id: to_user_id, to_user_id: userId}, {seen: true});
 
-        res.json({success: true, message});
+        res.json({success: true, messages});
     }catch(error){
         res.json({success: false, message: error.message});
     }
@@ -90,10 +90,12 @@ export const getChatMessages = async (req, res) => {
 
 export const getUserRecentMessages = async (req, res) => {
     try{
-        const {userId} = req.auth();
-        const messages = await Message.find({to_user_id: userId}).populate('from_user_id to_user_id').sort({created_at: -1});
+        const {userId} = await req.auth();
+        const messages = await Message.find({to_user_id: userId})
+            .populate('from_user_id to_user_id')
+            .sort({createdAt: -1});
 
-        res.json({success: false, messages});
+        res.json({success: true, messages});
     }catch(error){
         res.json({success: false, message: error.message});
     }

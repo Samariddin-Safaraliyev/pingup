@@ -5,14 +5,14 @@ import User from '../models/User.js';
 
 export const addPost = async (req, res) => {
     try{
-        const {userId} = req.auth();
+        const {userId} = await req.auth();
         const {content, post_type} = req.body;
-        const images = req.files;
+        const images = req.files || [];
 
         let image_urls = [];
 
         if(images.length){
-            image_urls = await Promise_all(
+            image_urls = await Promise.all(
                 images.map(async (image) => {
                     const fileBuffer = fs.readFileSync(image.path);
                     const response = await imagekit.upload({
@@ -49,7 +49,7 @@ export const addPost = async (req, res) => {
 
 export const getFeedPosts = async (req, res) => {
     try{
-        const {userId} = req.auth();
+        const {userId} = await req.auth();
         const user = await User.findById(userId);
 
         const userIds = [userId, ...user.connections, ...user.following];
@@ -64,7 +64,7 @@ export const getFeedPosts = async (req, res) => {
 
 export const likePost = async (req, res) => {
     try{
-        const {userId} = req.auth();
+        const {userId} = await req.auth();
         const {postId} = req.body;
 
         const post = await Post.findById(postId);

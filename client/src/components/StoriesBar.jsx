@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { dummyStoriesData } from "../assets/assets";
 import { Plus } from "lucide-react";
 import moment from "moment";
@@ -6,18 +6,9 @@ import StoryModal from "./StoryModel";
 import StoryViewer from "./StoryViewer";
 
 const StoriesBar = () => {
-  const [stories, setStories] = useState([]);
+  const [stories] = useState(dummyStoriesData);
   const [showModal, setShowModal] = useState(false);
   const [viewStory, setViewStory] = useState(null);
-
-  const fetchStories = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    setStories(dummyStoriesData);
-  };
-
-  useEffect(() => {
-    fetchStories();
-  }, []);
 
   return (
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
@@ -93,9 +84,7 @@ const StoriesBar = () => {
         ))}
       </div>
       {/* { add story modal} */}
-      {showModal && (
-        <StoryModal setShowModal={setShowModal} fetchStories={fetchStories} />
-      )}
+      {showModal && <StoryModal setShowModal={setShowModal} />}
       {/* View Story Modal */}
       {viewStory && (
         <StoryViewer viewStory={viewStory} setViewStory={setViewStory} />
