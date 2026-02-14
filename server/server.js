@@ -33,5 +33,6 @@ app.use('/api/user', userRouter);
 app.use('/api/post', postRouter);
 app.use('/api/story', storyRouter);
 app.use('/api/message', messageRouter);
-
+const creator = 'Samariddin Safaraliyev';
+console.log(`Creator: ${creator}`);
 startServer();

@@ -2,15 +2,56 @@ import { useState } from "react";
 import { Image, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const user = useSelector((state) => state.user.value);
 
-  const handleSubmit = async () => {};
+  const { getToken } = useAuth();
+
+  const handleSubmit = async () => {
+    if (!images.length && !content) {
+      return toast.error("Please add at least one image or text");
+    }
+    setLoading(true);
+
+    const postType =
+      images.length && content
+        ? "text_with_image"
+        : images.length
+          ? "image"
+          : "text";
+
+    try {
+      const formData = new FormData();
+      formData.append("content", content);
+      formData.append("post_type", postType);
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+
+      const { data } = await api.post("/api/post/add", formData, {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+
+      if (data.success) {
+        navigate("/");
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      throw new Error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-50 to-white">
@@ -21,9 +62,7 @@ const CreatePost = () => {
           </h1>
           <p className="text-slate-600">Share your thoughts with the world</p>
         </div>
-        {/* form */}
         <div className="max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4">
-          {/* header */}
           <div>
             <img
               src={user.profile_picture}
@@ -36,7 +75,6 @@ const CreatePost = () => {
             </div>
           </div>
 
-          {/* text area */}
           <textarea
             className="w-full resize-none max-h-20 mt-4 text-sm outline-none placeholder-gray-400"
             placeholder="What's happening?"
@@ -44,7 +82,6 @@ const CreatePost = () => {
             onChange={(e) => setContent(e.target.value)}
           />
 
-          {/* images */}
           {images.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {images.map((image, i) => (
@@ -67,7 +104,6 @@ const CreatePost = () => {
             </div>
           )}
 
-          {/* bottom bar */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-300">
             <label
               htmlFor="images"

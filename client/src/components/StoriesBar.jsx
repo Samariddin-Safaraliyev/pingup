@@ -6,14 +6,13 @@ import StoryModal from "./StoryModel";
 import StoryViewer from "./StoryViewer";
 
 const StoriesBar = () => {
-  const [stories] = useState(dummyStoriesData);
+  const [stories, setStories] = useState(dummyStoriesData);
   const [showModal, setShowModal] = useState(false);
   const [viewStory, setViewStory] = useState(null);
 
   return (
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
       <div className="flex gap-4 pb-5">
-        {/* Add story card */}
         <div
           onClick={() => setShowModal(true)}
           className="rounded-lg shadow-sm min-w-30 max-w-30 max-h-40 aspect-3/4 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-dashed border-indigo-300 bg-linear-to-b from-indigo-50 to-white"
@@ -28,16 +27,17 @@ const StoriesBar = () => {
           </div>
         </div>
 
-        {/* Story cards */}
         {stories.map((story, index) => (
           <div
             onClick={() => setViewStory(story)}
             key={index}
             className={`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 aspect-3/4 cursor-pointer hover:shadow-lg transition-all duration-200 active:scale-95 overflow-hidden ${
-              story.media_type === "text"
-                ? `bg-[${story.background_color}] hover:opacity-90`
-                : ""
+              story.media_type === "text" ? "hover:opacity-90" : "bg-black"
             }`}
+            style={{
+              backgroundColor:
+                story.media_type === "text" ? story.background_color : "black",
+            }}
           >
             {story.media_type !== "text" && (
               <div className="absolute inset-0 z-0">
@@ -51,9 +51,6 @@ const StoriesBar = () => {
                   <video
                     src={story.media_url}
                     className="h-full w-full object-cover opacity-70"
-                    // autoPlay
-                    // loop
-                    // muted
                   />
                 )}
               </div>
@@ -83,9 +80,10 @@ const StoriesBar = () => {
           </div>
         ))}
       </div>
-      {/* { add story modal} */}
-      {showModal && <StoryModal setShowModal={setShowModal} />}
-      {/* View Story Modal */}
+
+      {showModal && (
+        <StoryModal setShowModal={setShowModal} setStories={setStories} />
+      )}
       {viewStory && (
         <StoryViewer viewStory={viewStory} setViewStory={setViewStory} />
       )}

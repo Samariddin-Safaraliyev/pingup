@@ -3,15 +3,42 @@ import moment from "moment";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const PostCard = ({ post }) => {
-  const postWihtHashtags = post.content.replace(
+  const postWihtHashtags = (post.content || "").replace(
     /(#\w+)/g,
     '<span class="text-indigo-600">$1</span>',
   );
-  const [likes] = useState(post.likes_count);
+  const [likes, setLikes] = useState(post.likes_count || []);
   const currentUser = useSelector((state) => state.user.value);
-  const handleLike = async () => {};
+  const { getToken } = useAuth();
+
+  const handleLike = async () => {
+    try {
+      const { data } = await api.post(
+        "/api/post/like",
+        { postId: post._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        setLikes((prev) => {
+          if (prev.includes(currentUser._id)) {
+            return prev.filter((id) => id !== currentUser._id);
+          }
+          return [...prev, currentUser._id];
+        });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const navigate = useNavigate();
   return (
@@ -35,14 +62,12 @@ const PostCard = ({ post }) => {
           </div>
         </div>
       </div>
-      {/* Content */}
       {post.content && (
         <div
           className="text-gray-800 text-sm whitespace-pre-line"
           dangerouslySetInnerHTML={{ __html: postWihtHashtags }}
         />
       )}
-      {/* Images */}
       <div className="grid grid-cols-2 gap-2 mb-2">
         {post.image_urls.map((img, index) => (
           <img
@@ -56,7 +81,6 @@ const PostCard = ({ post }) => {
         ))}
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-4 text-gray-600 text-sm pt-2 border-t border-gray-300">
         <div className="flex items-center gap-1">
           <Heart

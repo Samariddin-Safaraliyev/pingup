@@ -56,7 +56,6 @@ const Profile = () => {
         <div className="relative h-full overflow-y-scroll bg-gray-50 p-6">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-2xl shadow overflow-hidden">
-              {/* Cover photo */}
               <div className="h-40 md:h-56 bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200">
                 {user.cover_photo && (
                   <img
@@ -66,7 +65,6 @@ const Profile = () => {
                   />
                 )}
               </div>
-              {/* User info */}
               <UserProfileInfo
                 user={user}
                 posts={posts}
@@ -75,7 +73,6 @@ const Profile = () => {
               />
             </div>
 
-            {/* Tabs */}
             <div className="mt-6">
               <div className="bg-white rounded-xl shadow p-1 flex max-w-md mx-auto">
                 {TABS.map((tab) => (
@@ -92,7 +89,6 @@ const Profile = () => {
                   </button>
                 ))}
               </div>
-              {/* POSTS */}
               {activeTab === "posts" && (
                 <div className="mt-6 flex flex-col items-center gap-6">
                   {posts.map((post) => (
@@ -101,7 +97,6 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Media */}
               {activeTab === "media" && (
                 <div className="flex flex-wrap mt-6 max-w-6xl">
                   {posts
@@ -117,7 +112,6 @@ const Profile = () => {
                           >
                             <img
                               src={image}
-                              key={index}
                               className="w-64 aspect-video object-cover"
                               alt="image"
                             />
@@ -132,7 +126,6 @@ const Profile = () => {
               )}
             </div>
           </div>
-          {/* edit profile modal */}
           {showEdit && <ProfileModal setShowEdit={setShowEdit} />}
         </div>
       ) : (
