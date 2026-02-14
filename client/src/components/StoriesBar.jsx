@@ -1,14 +1,39 @@
-import { useState } from "react";
-import { dummyStoriesData } from "../assets/assets";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import moment from "moment";
 import StoryModal from "./StoryModel";
 import StoryViewer from "./StoryViewer";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const StoriesBar = () => {
-  const [stories, setStories] = useState(dummyStoriesData);
+  const { getToken } = useAuth();
+
+  const [stories, setStories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewStory, setViewStory] = useState(null);
+
+  const fetchStories = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await api.get("/api/story/get", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setStories(data.stories);
+      } else {
+        toast.error(data.message || "Failed to fetch stories");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchStories();
+  }, []);
 
   return (
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
