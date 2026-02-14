@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const RecentMessages = () => {
   const [messages, setMessages] = useState([]);
   const { user } = useUser();
+  
   const { getToken } = useAuth();
 
   const fetchRecentMessages = useCallback(async () => {

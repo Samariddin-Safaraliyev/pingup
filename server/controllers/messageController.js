@@ -73,6 +73,7 @@ export const getChatMessages = async (req, res) => {
     try{
         const {userId} = await req.auth();
         const {to_user_id} = req.body;
+        
         const messages = await Message.find({
             $or: [
                 {from_user_id: userId, to_user_id},
