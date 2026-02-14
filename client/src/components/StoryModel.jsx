@@ -8,7 +8,7 @@ const StoryModal = ({ setShowModal, setStories }) => {
   const bgColors = ["#4f46e5", "#999", "#000", "#222", "#555", "#777"];
 
   const [mode, setMode] = useState("text");
-  const [background, setBackground] = useState(bgColors[2]);
+  const [background, setBackground] = useState(bgColors[0]);
   const [text, setText] = useState("");
   const [media, setMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);

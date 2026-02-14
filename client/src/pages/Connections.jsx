@@ -18,6 +18,7 @@ const Connections = () => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const dispatch = useDispatch();
+  
   const { connections, pendingConnections, followers, following } = useSelector(
     (state) => state.connections,
   );
