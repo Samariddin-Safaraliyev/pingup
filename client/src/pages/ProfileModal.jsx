@@ -118,15 +118,19 @@ const ProfileModal = ({ setShowEdit }) => {
                   }
                 />
                 <div className="group/cover relative">
-                  <img
-                    src={
-                      editForm.cover_photo
-                        ? URL.createObjectURL(editForm.cover_photo)
-                        : user.cover_photo
-                    }
-                    alt="cover_photo"
-                    className="w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2"
-                  />
+                  {editForm.cover_photo || user.cover_photo ? (
+                    <img
+                      src={
+                        editForm.cover_photo
+                          ? URL.createObjectURL(editForm.cover_photo)
+                          : user.cover_photo
+                      }
+                      alt=""
+                      className="w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2"
+                    />
+                  ) : (
+                    <div className="w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 mt-2" />
+                  )}
                   <div className="absolute hidden group-hover/cover:flex top-0 left-0 right-0 bottom-0 bg-black/20 rounded-lg items-center justify-center">
                     <Pencil className="w-5 h-5 text-white" />
                   </div>
